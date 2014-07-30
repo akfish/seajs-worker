@@ -97,4 +97,4 @@ define (require, exports, module) ->
 
 That's all one have to do. Simple as that.
 
-See `example` folder for complete code.
+See `example` folder for complete code. [Live demo](http://catx.me/seajs-worker/example/).
