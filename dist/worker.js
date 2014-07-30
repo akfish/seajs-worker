@@ -1,57 +1,106 @@
 define(function(require, exports, module) {
-  var SeaWorker;
-  return SeaWorker = (function() {
-    function SeaWorker(sea_url, sea_opts, services) {
-      var fn, name, _ref;
-      this.services = services;
+  var SeaWorker, is_worker;
+  is_worker = typeof importScripts === 'function';
+  console.log("Running in worker: " + is_worker);
+  Function.prototype.worker_method = function(name, fn) {
+    if (!is_worker || typeof fn !== 'function') {
+      return;
+    }
+    return this.prototype[name] = fn;
+  };
+  Function.prototype.browser_method = function(name, fn) {
+    if (is_worker || typeof fn !== 'function') {
+      return;
+    }
+    return this.prototype[name] = fn;
+  };
+  Function.prototype.worker_service = function(name, fn) {
+    if (typeof fn !== 'function') {
+      return;
+    }
+    if (is_worker) {
+      console.log("Register worker service " + name + " in worker");
+      return this.prototype[name] = fn;
+    } else {
+      console.log("Register worker service " + name + " in browser");
+      return this.prototype[name] = function() {
+        var args, cb, n;
+        n = arguments.length;
+        cb = arguments[n - 1];
+        args = Array.prototype.slice.call(arguments, 0, n - 1);
+        return this.invoke(name, args, cb);
+      };
+    }
+  };
+  SeaWorker = (function() {
+    SeaWorker.worker_method('foo', function() {
+      return console.log('In worker');
+    });
+
+    SeaWorker.browser_method('foo', function() {
+      return console.log('In browser');
+    });
+
+    SeaWorker.worker_method('init', function() {
+      return self.onmessage = (function(_this) {
+        return function(e) {
+          var args, err, id, name, result;
+          name = e.data.service;
+          args = e.data.payload;
+          id = e.data.id;
+          try {
+            result = _this[name].apply(void 0, args);
+            return self.postMessage({
+              service: name,
+              id: id,
+              result: result
+            });
+          } catch (_error) {
+            err = _error;
+            return self.postMessage({
+              service: name,
+              id: id,
+              error: err.toString()
+            });
+          }
+        };
+      })(this);
+    });
+
+    SeaWorker.browser_method('init', function(sea_url, worker_url, sea_opts) {
+      var this_path;
       this.cb = {};
       this.id = 0;
       this.src = "importScripts('" + sea_url + "');\n";
       if (sea_opts != null) {
         this.src += "seajs.config(" + (JSON.stringify(sea_opts)) + ");\n";
       }
-      this.src += "define(function(require, exports, module) {\n";
-      this.src += 'console.log("-_-");\nvar _services = {};\nself.onmessage = function (e) {\n  var name = e.data.service;\n  var args = e.data.payload;\n  var id = e.data.id;\n\n  try {\n    var result = _services[name].apply(undefined, args);\n    self.postMessage({service: name, id: id, result: result});\n  } catch (err) {\n    console.error(err);\n    self.postMessage({service: name, id: id, error: err.toString()});\n  }\n\n};\n';
-      _ref = this.services;
-      for (name in _ref) {
-        fn = _ref[name];
-        this.src += "_services['" + name + "'] = " + (fn.toString()) + ";\n";
-        this[name] = (function(_this) {
-          return function() {
-            var args, cb, n;
-            n = arguments.length;
-            cb = arguments[n - 1];
-            args = Array.prototype.slice.call(arguments, 0, n - 1);
-            _this.invoke(name, args, cb);
-            return _this.cb = {};
-          };
-        })(this);
-      }
-      this.src += "});";
+      this_path = worker_url;
+      this.src += "seajs.use('" + this_path + "');\n";
       this._blob = new Blob([this.src]);
       this._blob_url = window.URL.createObjectURL(this._blob);
       this._worker = new Worker(this._blob_url);
-      this._worker.onmessage = (function(_this) {
+      return this._worker.onmessage = (function(_this) {
         return function(e) {
-          var _ref1;
-          if (((_ref1 = e.data) != null ? _ref1.service : void 0) != null) {
+          var _ref;
+          if (((_ref = e.data) != null ? _ref.service : void 0) != null) {
             return _this.handle(e.data);
           }
         };
       })(this);
-    }
+    });
 
-    SeaWorker.prototype.handle = function(data) {
+    SeaWorker.browser_method('handle', function(data) {
       var c;
       c = this.cb[data.id];
       delete this.cb[data.id];
       if (c.service !== data.service) {
         throw "Expect callback id=" + data.id + " for service " + c.service + ". Got " + data.service;
-        return typeof c.fn === "function" ? c.fn(data.error, data.result) : void 0;
       }
-    };
+      return typeof c.fn === "function" ? c.fn(data.error, data.result) : void 0;
+    });
 
-    SeaWorker.prototype.invoke = function(service, args, callback) {
+    SeaWorker.browser_method('invoke', function(service, args, callback) {
       this._worker.postMessage({
         service: service,
         payload: args,
@@ -61,11 +110,23 @@ define(function(require, exports, module) {
         service: service,
         fn: callback
       };
-      this.id++;
-      return module.exports = SeaWorker;
+      return this.id++;
+    });
+
+    function SeaWorker(sea_url, worker_url, sea_opts) {
+      this.init(sea_url, worker_url, sea_opts);
+    }
+
+    SeaWorker.start_worker = function(worker_class) {
+      var worker;
+      if (!is_worker) {
+        return;
+      }
+      return worker = new worker_class();
     };
 
     return SeaWorker;
 
   })();
+  return module.exports = SeaWorker;
 });
