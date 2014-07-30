@@ -1,9 +1,6 @@
 define(function(require, exports, module) {
   var SeaWorker, is_worker;
   is_worker = typeof importScripts === 'function';
-  console.log("Running in worker: " + is_worker);
-  console.log(module.uri);
-  console.log(JSON.stringify(seajs.data, null, 4));
   Function.prototype.worker_method = function(name, fn) {
     if (!is_worker || typeof fn !== 'function') {
       return;
@@ -21,10 +18,8 @@ define(function(require, exports, module) {
       return;
     }
     if (is_worker) {
-      console.log("Register worker service " + name + " in worker");
       return this.prototype[name] = fn;
     } else {
-      console.log("Register worker service " + name + " in browser");
       return this.prototype[name] = function() {
         var args, cb, n;
         n = arguments.length;
@@ -35,14 +30,6 @@ define(function(require, exports, module) {
     }
   };
   SeaWorker = (function() {
-    SeaWorker.worker_method('foo', function() {
-      return console.log('In worker');
-    });
-
-    SeaWorker.browser_method('foo', function() {
-      return console.log('In browser');
-    });
-
     SeaWorker.worker_method('init', function() {
       return self.onmessage = (function(_this) {
         return function(e) {

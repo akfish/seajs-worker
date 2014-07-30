@@ -1,5 +1,3 @@
-console.log("Launcher Up. Waiting for config payload.");
-
 self.onmessage = function(e) {
   var opts;
   opts = e.data;

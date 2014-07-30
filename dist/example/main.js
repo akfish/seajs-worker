@@ -1,15 +1,12 @@
 define(function(require, exports, module) {
   var Worker, sea_opts, worker;
   console.log('Yo!');
-  console.log('Up!');
+  console.log('Whats Up!');
   Worker = require('./example-worker');
   sea_opts = {
     base: '../dist'
   };
   worker = new Worker(sea_opts);
-  console.log(worker);
-  console.log("Generated worker source:");
-  console.log(worker.src);
   console.log("Test 1: worker.echo('whatever')");
   worker.echo("whatever", function(err, msg) {
     return console.log("Worker echos: " + msg);

@@ -1,6 +1,5 @@
 define (require, exports, module) ->
   SeaWorker = require '../worker'
-  console.log JSON.stringify seajs.data, null, 4
   class ExampleWorker extends SeaWorker
     @worker_service 'echo', (msg) ->
       console.log "Browser send: #{msg}"

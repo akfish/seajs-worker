@@ -1,8 +1,6 @@
 define (require, exports, module) ->
   is_worker = typeof importScripts == 'function'
-  console.log "Running in worker: #{is_worker}"
-  console.log module.uri
-  console.log JSON.stringify seajs.data, null, 4
+
   Function::worker_method = (name, fn) ->
     if not is_worker or typeof fn != 'function'
       return
@@ -17,10 +15,8 @@ define (require, exports, module) ->
     if typeof fn != 'function'
       return
     if is_worker
-      console.log("Register worker service #{name} in worker")
       @::[name] = fn
     else
-      console.log("Register worker service #{name} in browser")
       @::[name] = ->
         n = arguments.length
         cb = arguments[n - 1]
@@ -28,11 +24,6 @@ define (require, exports, module) ->
         @invoke name, args, cb
 
   class SeaWorker
-    @worker_method 'foo', ->
-      console.log 'In worker'
-    @browser_method 'foo', ->
-      console.log 'In browser'
-
     @worker_method 'init', ->
       # Message handler
       self.onmessage = (e) =>
