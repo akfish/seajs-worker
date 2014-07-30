@@ -4,7 +4,7 @@ Seamless & Modular Web Worker
 
 ## Motivation
 
-Working with web workers can be painful sometime.
+Working with web workers can be painful sometimes.
 
 The worker script has to be in a separate file/blob
 and communicate with browser script via messages:
