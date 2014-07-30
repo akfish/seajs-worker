@@ -1,4 +1,4 @@
-# seajs-worker
+# [seajs-worker](https://github.com/akfish/seajs-worker)
 
 Seamless & Modular Web Worker
 
@@ -97,4 +97,10 @@ define (require, exports, module) ->
 
 That's all one have to do. Simple as that.
 
-See `example` folder for complete code. [Live demo](http://catx.me/seajs-worker/example/).
+See `example` folder for complete code.
+
+## Links
+
+* [GitHub Repo](https://github.com/akfish/seajs-worker)
+* [Documents](http://catx.me/seajs-worker/)
+* [Live Version Of the Example Folder](http://catx.me/seajs-worker/example/)
