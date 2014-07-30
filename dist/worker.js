@@ -2,6 +2,7 @@ define(function(require, exports, module) {
   var SeaWorker, is_worker;
   is_worker = typeof importScripts === 'function';
   console.log("Running in worker: " + is_worker);
+  console.log(JSON.stringify(seajs.data, null, 4));
   Function.prototype.worker_method = function(name, fn) {
     if (!is_worker || typeof fn !== 'function') {
       return;
@@ -67,15 +68,16 @@ define(function(require, exports, module) {
       })(this);
     });
 
-    SeaWorker.browser_method('init', function(sea_url, worker_url, sea_opts) {
+    SeaWorker.browser_method('init', function(worker_url, sea_opts) {
       var this_path;
       this.cb = {};
       this.id = 0;
-      this.src = "importScripts('" + sea_url + "');\n";
+      this.src = "importScripts('" + seajs.data.loader + "');\n";
       if (sea_opts != null) {
         this.src += "seajs.config(" + (JSON.stringify(sea_opts)) + ");\n";
       }
       this_path = worker_url;
+      console.log(new Error().stack);
       this.src += "seajs.use('" + this_path + "');\n";
       this._blob = new Blob([this.src]);
       this._blob_url = window.URL.createObjectURL(this._blob);
@@ -113,8 +115,8 @@ define(function(require, exports, module) {
       return this.id++;
     });
 
-    function SeaWorker(sea_url, worker_url, sea_opts) {
-      this.init(sea_url, worker_url, sea_opts);
+    function SeaWorker(worker_url, sea_opts) {
+      this.init(worker_url, sea_opts);
     }
 
     SeaWorker.start_worker = function(worker_class) {

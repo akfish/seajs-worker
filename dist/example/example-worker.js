@@ -4,6 +4,7 @@ var __hasProp = {}.hasOwnProperty,
 define(function(require, exports, module) {
   var ExampleWorker, SeaWorker;
   SeaWorker = require('../worker');
+  console.log(JSON.stringify(seajs.data, null, 4));
   ExampleWorker = (function(_super) {
     __extends(ExampleWorker, _super);
 

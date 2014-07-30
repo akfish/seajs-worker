@@ -1,6 +1,7 @@
 define (require, exports, module) ->
   is_worker = typeof importScripts == 'function'
   console.log "Running in worker: #{is_worker}"
+  console.log JSON.stringify seajs.data, null, 4
   Function::worker_method = (name, fn) ->
     if not is_worker or typeof fn != 'function'
       return
@@ -50,17 +51,18 @@ define (require, exports, module) ->
             id: id
             error: err.toString()
 
-    @browser_method 'init', (sea_url, worker_url, sea_opts) ->
+    @browser_method 'init', (worker_url, sea_opts) ->
       # Data members
       @cb = {}
       @id = 0
       # Set up sea.js in worker
-      @src = "importScripts('#{sea_url}');\n"
+      @src = "importScripts('#{seajs.data.loader}');\n"
       if sea_opts?
         @src += "seajs.config(#{JSON.stringify(sea_opts)});\n"
 
       # TODO: find path of this script
       this_path = worker_url
+      console.log new Error().stack
       @src += "seajs.use('#{this_path}');\n"
 
       # Create worker
@@ -88,8 +90,8 @@ define (require, exports, module) ->
         fn: callback
       @id++
 
-    constructor: (sea_url, worker_url, sea_opts) ->
-      @init sea_url, worker_url, sea_opts
+    constructor: (worker_url, sea_opts) ->
+      @init worker_url, sea_opts
 
     @start_worker: (worker_class)->
       if not is_worker
