@@ -1,5 +1,6 @@
 define (require, exports, module) ->
   SeaWorker = require '../worker'
+  # @nodoc
   class ExampleWorker extends SeaWorker
     @worker_service 'echo', (msg) ->
       console.log "Browser sends: #{msg}"
