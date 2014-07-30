@@ -43,7 +43,7 @@ define (require, exports, module) ->
             id: id
             error: err.toString()
 
-    @browser_method 'init', (sea_opts) ->
+    @browser_method 'init', ->
       # Data members
       @cb = {}
       @id = 0
@@ -52,10 +52,10 @@ define (require, exports, module) ->
       this_url = module.uri
       launcher_url = this_url.replace "worker.js", "launcher.js"
 
-      # Payload for initialize worker
+      # Payload for initializing worker
       payload =
         sea_url: seajs.data.loader
-        opts: sea_opts
+        opts: SeaWorker.__sea_opts
         worker_url: @constructor.__sea_mod_uri
 
       # Create worker
@@ -82,14 +82,17 @@ define (require, exports, module) ->
         fn: callback
       @id++
 
-    constructor: (sea_opts) ->
-      @init sea_opts
+    constructor: ->
+      @init()
 
     @register: (worker_class)->
       if not is_worker
         return
 
       worker = new worker_class()
+
+    @config: (sea_opts) ->
+      SeaWorker.__sea_opts = sea_opts
 
     # Fired when module is first loaded and executed
     seajs.on "exec", (mod) ->

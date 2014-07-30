@@ -56,7 +56,7 @@ define(function(require, exports, module) {
       })(this);
     });
 
-    SeaWorker.browser_method('init', function(sea_opts) {
+    SeaWorker.browser_method('init', function() {
       var launcher_url, payload, this_url;
       this.cb = {};
       this.id = 0;
@@ -64,7 +64,7 @@ define(function(require, exports, module) {
       launcher_url = this_url.replace("worker.js", "launcher.js");
       payload = {
         sea_url: seajs.data.loader,
-        opts: sea_opts,
+        opts: SeaWorker.__sea_opts,
         worker_url: this.constructor.__sea_mod_uri
       };
       this._worker = new Worker(launcher_url);
@@ -102,8 +102,8 @@ define(function(require, exports, module) {
       return this.id++;
     });
 
-    function SeaWorker(sea_opts) {
-      this.init(sea_opts);
+    function SeaWorker() {
+      this.init();
     }
 
     SeaWorker.register = function(worker_class) {
@@ -112,6 +112,10 @@ define(function(require, exports, module) {
         return;
       }
       return worker = new worker_class();
+    };
+
+    SeaWorker.config = function(sea_opts) {
+      return SeaWorker.__sea_opts = sea_opts;
     };
 
     seajs.on("exec", function(mod) {

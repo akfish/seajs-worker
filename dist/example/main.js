@@ -6,7 +6,8 @@ define(function(require, exports, module) {
   sea_opts = {
     base: '../dist'
   };
-  worker = new Worker(sea_opts);
+  Worker.config(sea_opts);
+  worker = new Worker();
   console.log("Test 1: worker.echo('whatever')");
   worker.echo("whatever", function(err, msg) {
     return console.log("Worker echos: " + msg);
