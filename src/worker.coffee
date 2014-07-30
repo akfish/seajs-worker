@@ -1,6 +1,7 @@
 define (require, exports, module) ->
   is_worker = typeof importScripts == 'function'
   console.log "Running in worker: #{is_worker}"
+  console.log module.uri
   console.log JSON.stringify seajs.data, null, 4
   Function::worker_method = (name, fn) ->
     if not is_worker or typeof fn != 'function'
@@ -51,19 +52,26 @@ define (require, exports, module) ->
             id: id
             error: err.toString()
 
-    @browser_method 'init', (worker_url, sea_opts) ->
+    @browser_method 'init', (sea_opts) ->
       # Data members
       @cb = {}
       @id = 0
+      # Find launcher script
+      this_url = module.uri
+      launcher_url = this_url.replace ".worker.js", ".launcher.js"
+
+      console.log "Worker Mod URI: #{@constructor.__sea_mod_uri}"
+      # TODO: create worker with launcher
+      # TODO: initialzie launcher
       # Set up sea.js in worker
       @src = "importScripts('#{seajs.data.loader}');\n"
       if sea_opts?
         @src += "seajs.config(#{JSON.stringify(sea_opts)});\n"
 
       # TODO: find path of this script
-      this_path = worker_url
+      worker_url = @constructor.__sea_mod_uri
       console.log new Error().stack
-      @src += "seajs.use('#{this_path}');\n"
+      @src += "seajs.use('#{worker_url}');\n"
 
       # Create worker
       @_blob = new Blob [@src]
@@ -90,13 +98,18 @@ define (require, exports, module) ->
         fn: callback
       @id++
 
-    constructor: (worker_url, sea_opts) ->
-      @init worker_url, sea_opts
+    constructor: (sea_opts) ->
+      @init sea_opts
 
-    @start_worker: (worker_class)->
+    @register: (worker_class)->
       if not is_worker
         return
 
       worker = new worker_class()
+
+    # Fired when module is first loaded and executed
+    seajs.on "exec", (mod) ->
+      # Set module URI for later use
+      mod.exports?.__sea_mod_uri = mod.uri
 
   module.exports = SeaWorker

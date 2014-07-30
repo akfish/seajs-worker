@@ -1,13 +1,12 @@
 define(function(require, exports, module) {
-  var Worker, sea_opts, worker, worker_url;
+  var Worker, sea_opts, worker;
   console.log('Yo!');
   console.log('Up!');
   Worker = require('./example-worker');
   sea_opts = {
     base: '../dist'
   };
-  worker_url = location.href + '../dist/example/example-worker';
-  worker = new Worker(worker_url, sea_opts);
+  worker = new Worker(sea_opts);
   console.log(worker);
   console.log("Generated worker source:");
   console.log(worker.src);

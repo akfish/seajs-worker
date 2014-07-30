@@ -11,6 +11,6 @@ define (require, exports, module) ->
       adder = require './adder'
       return adder a, b
 
-  SeaWorker.start_worker ExampleWorker
+  SeaWorker.register ExampleWorker
 
   module.exports = ExampleWorker

@@ -4,8 +4,7 @@ define (require, exports, module) ->
   Worker = require './example-worker'
   sea_opts =
     base: '../dist'
-  worker_url = location.href + '../dist/example/example-worker'
-  worker = new Worker worker_url, sea_opts
+  worker = new Worker sea_opts
   console.log worker
   console.log "Generated worker source:"
   console.log worker.src

@@ -27,6 +27,6 @@ define(function(require, exports, module) {
     return ExampleWorker;
 
   })(SeaWorker);
-  SeaWorker.start_worker(ExampleWorker);
+  SeaWorker.register(ExampleWorker);
   return module.exports = ExampleWorker;
 });
