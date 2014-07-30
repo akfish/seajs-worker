@@ -56,30 +56,23 @@ define (require, exports, module) ->
       # Data members
       @cb = {}
       @id = 0
+
       # Find launcher script
       this_url = module.uri
-      launcher_url = this_url.replace ".worker.js", ".launcher.js"
+      launcher_url = this_url.replace "worker.js", "launcher.js"
 
-      console.log "Worker Mod URI: #{@constructor.__sea_mod_uri}"
-      # TODO: create worker with launcher
-      # TODO: initialzie launcher
-      # Set up sea.js in worker
-      @src = "importScripts('#{seajs.data.loader}');\n"
-      if sea_opts?
-        @src += "seajs.config(#{JSON.stringify(sea_opts)});\n"
-
-      # TODO: find path of this script
-      worker_url = @constructor.__sea_mod_uri
-      console.log new Error().stack
-      @src += "seajs.use('#{worker_url}');\n"
+      # Payload for initialize worker
+      payload =
+        sea_url: seajs.data.loader
+        opts: sea_opts
+        worker_url: @constructor.__sea_mod_uri
 
       # Create worker
-      @_blob = new Blob [@src]
-      @_blob_url = window.URL.createObjectURL @_blob
-      @_worker = new Worker @_blob_url
+      @_worker = new Worker launcher_url
       @_worker.onmessage = (e) =>
         if e.data?.service?
           @handle e.data
+      @_worker.postMessage payload
 
     @browser_method 'handle', (data) ->
       c = @cb[data.id]

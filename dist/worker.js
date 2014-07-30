@@ -70,23 +70,18 @@ define(function(require, exports, module) {
     });
 
     SeaWorker.browser_method('init', function(sea_opts) {
-      var launcher_url, this_url, worker_url;
+      var launcher_url, payload, this_url;
       this.cb = {};
       this.id = 0;
       this_url = module.uri;
-      launcher_url = this_url.replace(".worker.js", ".launcher.js");
-      console.log("Worker Mod URI: " + this.constructor.__sea_mod_uri);
-      this.src = "importScripts('" + seajs.data.loader + "');\n";
-      if (sea_opts != null) {
-        this.src += "seajs.config(" + (JSON.stringify(sea_opts)) + ");\n";
-      }
-      worker_url = this.constructor.__sea_mod_uri;
-      console.log(new Error().stack);
-      this.src += "seajs.use('" + worker_url + "');\n";
-      this._blob = new Blob([this.src]);
-      this._blob_url = window.URL.createObjectURL(this._blob);
-      this._worker = new Worker(this._blob_url);
-      return this._worker.onmessage = (function(_this) {
+      launcher_url = this_url.replace("worker.js", "launcher.js");
+      payload = {
+        sea_url: seajs.data.loader,
+        opts: sea_opts,
+        worker_url: this.constructor.__sea_mod_uri
+      };
+      this._worker = new Worker(launcher_url);
+      this._worker.onmessage = (function(_this) {
         return function(e) {
           var _ref;
           if (((_ref = e.data) != null ? _ref.service : void 0) != null) {
@@ -94,6 +89,7 @@ define(function(require, exports, module) {
           }
         };
       })(this);
+      return this._worker.postMessage(payload);
     });
 
     SeaWorker.browser_method('handle', function(data) {
