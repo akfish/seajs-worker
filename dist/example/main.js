@@ -21,10 +21,10 @@ define(function(require, exports, module) {
   console.log(worker.src);
   console.log("Test 1: worker.echo('whatever')");
   worker.echo("whatever", function(err, msg) {
-    return console.log("Worker echos: " + msg);
+    console.log("Worker echos: " + msg);
+    console.log("Test 2: worker.add(1 + 2)");
+    return console.log("An adder module is loaded with sea.js within worker");
   });
-  console.log("Test 2: worker.add(1 + 2)");
-  console.log("An adder module is loaded with sea.js within worker");
   return worker.add(100, 1, function(err, result) {
     return console.log("Worker adds to " + result);
   });

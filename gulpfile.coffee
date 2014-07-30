@@ -10,27 +10,27 @@ coffee_src    = './src/**/*.coffee'
 coffee_dst    = './dist'
 
 watch_sources = ->
-        gulp.watch coffee_src, ['coffee']
-        
+  gulp.watch coffee_src, ['coffee']
+
 compile_coffee = ->
-        gulp.src coffee_src
-                .pipe coffee bare: true
-                .on 'error', gutil.log
-                .pipe gulp.dest coffee_dst
+  gulp.src coffee_src
+    .pipe coffee bare: true
+    .on 'error', gutil.log
+    .pipe gulp.dest coffee_dst
 
 gulp.task 'coffee', ->
-        compile_coffee()
+    compile_coffee()
 
 gulp.task 'server', ['coffee'], ->
-        connect.server
-                livereload: true
+    connect.server
+      livereload: true
 
 gulp.task 'watch', ->
-        watch_sources()
+    watch_sources()
 
 gulp.task 'livereload', ->
-        gulp.src coffee_src, read: false
-                .pipe watch()
-                .pipe connect.reload()
-        
+    gulp.src coffee_src, read: false
+      .pipe watch()
+      .pipe connect.reload()
+
 gulp.task 'default', ['coffee', 'watch', 'server', 'livereload']
