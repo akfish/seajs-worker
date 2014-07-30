@@ -259,32 +259,17 @@ function id2Uri(id, refUri) {
 seajs.resolve = id2Uri;
 
 // Check environment
-var isBrowser = !!(typeof window !== 'undefined' && typeof navigator !== 'undefined' && window.document);
-var isWebWorker = !isBrowser && typeof importScripts !== 'undefined';
+var isWebWorker = typeof window === 'undefined' && typeof importScripts !== 'undefined' && isFunction(importScripts);
 
+// Ignore about:xxx and blob:xxx
+var IGNORE_LOCATION_RE = /^(about:|blob:).*?/;
 var loaderDir;
+// Sea.js's full path
+var loaderPath;
 // Location is read-only from web worker, should be ok though
-var cwd = (!location.href || location.href.indexOf('about:') === 0) ? '' : dirname(location.href);
+var cwd = (!location.href || location.href.match(IGNORE_LOCATION_RE)) ? '' : dirname(location.href);
 
-if (isBrowser) {
-  var doc = document
-  var scripts = doc.scripts
-
-  // Recommend to add `seajsnode` id for the `sea.js` script element
-  var loaderScript = doc.getElementById("seajsnode") ||
-      scripts[scripts.length - 1]
-
-  // When `sea.js` is inline, set loaderDir to current working directory
-  loaderDir = dirname(getScriptAbsoluteSrc(loaderScript) || cwd)
-
-  function getScriptAbsoluteSrc(node) {
-    return node.hasAttribute ? // non-IE6/7
-        node.src :
-      // see http://msdn.microsoft.com/en-us/library/ms536429(VS.85).aspx
-        node.getAttribute("src", 4)
-  }
-}
-else if (isWebWorker) {
+if (isWebWorker) {
   // Web worker doesn't create DOM object when loading scripts
   // Get sea.js's path by stack trace.
   var stack;
@@ -304,9 +289,9 @@ else if (isWebWorker) {
   // FireFox: '@http://localhost:8000/script/sea-worker-debug.js:1082:1'
   // IE11:    '   at Anonymous function (http://localhost:8000/script/sea-worker-debug.js:295:5)'
   // Don't care about older browsers since web worker is an HTML5 feature
-  var reTrace = /.*?((?:http|https|file)(?::\/{2}[\w]+)(?:[\/|\.]?)(?:[^\s"]*)).*?/i
+  var TRACE_RE = /.*?((?:http|https|file)(?::\/{2}[\w]+)(?:[\/|\.]?)(?:[^\s"]*)).*?/i
   // Try match `url` (Note: in IE there will be a tailing ')')
-  var reUrl = /(.*?):\d+:\d+\)?$/;
+  var URL_RE = /(.*?):\d+:\d+\)?$/;
   // Find url of from stack trace.
   // Cannot simply read the first one because sometimes we will get:
   // Error
@@ -316,7 +301,7 @@ else if (isWebWorker) {
   //  at http://localhost:8000/_site/tests/specs/web-worker/worker.js:3:1
   while (stack.length > 0) {
     var top = stack.shift();
-    m = reTrace.exec(top);
+    m = TRACE_RE.exec(top);
     if (m != null) {
       break;
     }
@@ -325,24 +310,63 @@ else if (isWebWorker) {
   if (m != null) {
     // Remove line number and column number
     // No need to check, can't be wrong at this point
-    var url = reUrl.exec(m[1])[1];
+    var url = URL_RE.exec(m[1])[1];
   }
+  // Set
+  loaderPath = url
   // Set loaderDir
   loaderDir = dirname(url || cwd);
+  // This happens with inline worker.
+  // When entrance script's location.href is a blob url,
+  // cwd will not be available.
+  // Fall back to loaderDir.
+  if (cwd === '') {
+    cwd = loaderDir;
+  }
+}
+else {
+  var doc = document
+  var scripts = doc.scripts
 
+  // Recommend to add `seajsnode` id for the `sea.js` script element
+  var loaderScript = doc.getElementById("seajsnode") ||
+    scripts[scripts.length - 1]
+
+  function getScriptAbsoluteSrc(node) {
+    return node.hasAttribute ? // non-IE6/7
+      node.src :
+      // see http://msdn.microsoft.com/en-us/library/ms536429(VS.85).aspx
+      node.getAttribute("src", 4)
+  }
+  loaderPath = getScriptAbsoluteSrc(loaderScript)
+  // When `sea.js` is inline, set loaderDir to current working directory
+  loaderDir = dirname(loaderPath || cwd)
 }
 
 /**
  * util-request.js - The utilities for requesting script and style files
  * ref: tests/research/load-js-css/test.html
  */
-if (isBrowser) {
+if (isWebWorker) {
+  function requestFromWebWorker(url, callback, charset) {
+    // Load with importScripts
+    var error;
+    try {
+      importScripts(url);
+    } catch (e) {
+      error = e;
+    }
+    callback(error);
+  }
+  // For Developers
+  seajs.request = requestFromWebWorker;
+}
+else {
   var doc = document
   var head = doc.head || doc.getElementsByTagName("head")[0] || doc.documentElement
   var baseElement = head.getElementsByTagName("base")[0]
 
   var currentlyAddingScript
-  var interactiveScript
 
   function request(url, callback, charset) {
     var node = doc.createElement("script")
@@ -406,52 +430,36 @@ if (isBrowser) {
     }
   }
 
-  // Note: originally in util-cs.js
-  //       it referenced several temp varialbe from util-request.js (this file)
-  //       don't see why not putting them together
-  function getCurrentScript() {
-    if (currentlyAddingScript) {
-      return currentlyAddingScript
-    }
-
-    // For IE6-9 browsers, the script onload event may not fire right
-    // after the script is evaluated. Kris Zyp found that it
-    // could query the script nodes and the one that is in "interactive"
-    // mode indicates the current script
-    // ref: http://goo.gl/JHfFW
-    if (interactiveScript && interactiveScript.readyState === "interactive") {
-      return interactiveScript
-    }
-
-    var scripts = head.getElementsByTagName("script")
-
-    for (var i = scripts.length - 1; i >= 0; i--) {
-      var script = scripts[i]
-      if (script.readyState === "interactive") {
-        interactiveScript = script
-        return interactiveScript
-      }
-    }
-  }
-
   // For Developers
   seajs.request = request
 
-} else if (isWebWorker) {
-  function requestFromWebWorker(url, callback, charset) {
-    // Load with importScripts
-    var error;
-    try {
-      importScripts(url);
-    } catch (e) {
-      error = e;
-    }
-    callback(error);
-  }
-  // For Developers
-  seajs.request = requestFromWebWorker;
 }
+var interactiveScript
 
+function getCurrentScript() {
+  if (currentlyAddingScript) {
+    return currentlyAddingScript
+  }
+
+  // For IE6-9 browsers, the script onload event may not fire right
+  // after the script is evaluated. Kris Zyp found that it
+  // could query the script nodes and the one that is in "interactive"
+  // mode indicates the current script
+  // ref: http://goo.gl/JHfFW
+  if (interactiveScript && interactiveScript.readyState === "interactive") {
+    return interactiveScript
+  }
+
+  var scripts = head.getElementsByTagName("script")
+
+  for (var i = scripts.length - 1; i >= 0; i--) {
+    var script = scripts[i]
+    if (script.readyState === "interactive") {
+      interactiveScript = script
+      return interactiveScript
+    }
+  }
+}
 
 /**
  * util-deps.js - The parser for dependencies
@@ -965,7 +973,7 @@ Module.define = function (id, deps, factory) {
   }
 
   // Try to derive uri in IE6-9 for anonymous modules
-  if (isBrowser && !meta.uri && doc.attachEvent && typeof getCurrentScript !== "undefined") {
+  if (!isWebWorker && !meta.uri && doc.attachEvent && typeof getCurrentScript !== "undefined") {
     var script = getCurrentScript()
 
     if (script) {
@@ -1069,6 +1077,9 @@ data.base = loaderDir
 
 // The loader directory
 data.dir = loaderDir
+
+// The loader's full path
+data.loader = loaderPath
 
 // The current working directory
 data.cwd = cwd
