@@ -1,5 +1,6 @@
 define(function(require, exports, module) {
-  var SeaWorker, is_worker;
+  var SeaWorker, has_q, is_worker;
+  has_q = typeof Q === 'function';
   is_worker = typeof importScripts === 'function';
   Function.prototype.worker_method = function(name, fn) {
     if (!is_worker || typeof fn !== 'function') {
@@ -24,8 +25,17 @@ define(function(require, exports, module) {
         var args, cb, n;
         n = arguments.length;
         cb = arguments[n - 1];
-        args = Array.prototype.slice.call(arguments, 0, n - 1);
-        return this.invoke(name, args, cb);
+        if (typeof cb === 'function') {
+          args = Array.prototype.slice.call(arguments, 0, n - 1);
+        } else {
+          args = Array.prototype.slice.call(arguments, 0, n);
+          cb = null;
+        }
+        if (has_q) {
+          return this.invoke_promise(name, args, cb);
+        } else {
+          return this.invoke(name, args, cb);
+        }
       };
     }
   };
@@ -80,13 +90,28 @@ define(function(require, exports, module) {
     });
 
     SeaWorker.browser_method('handle', function(data) {
-      var c;
+      var c, err;
       c = this.cb[data.id];
       delete this.cb[data.id];
       if (c.service !== data.service) {
-        throw "Expect callback id=" + data.id + " for service " + c.service + ". Got " + data.service;
+        err = "Expect callback id=" + data.id + " for service " + c.service + ". Got " + data.service;
+        if (has_q) {
+          c.promise.reject(err);
+        } else {
+          throw err;
+        }
       }
-      return typeof c.fn === "function" ? c.fn(data.error, data.result) : void 0;
+      if (has_q) {
+        if (data.error != null) {
+          c.promise.reject(data.error);
+        } else {
+          c.promise.resolve(data.result);
+        }
+      } else {
+        if (typeof c.fn === "function") {
+          c.fn(data.error, data.result);
+        }
+      }
     });
 
     SeaWorker.browser_method('invoke', function(service, args, callback) {
@@ -100,6 +125,23 @@ define(function(require, exports, module) {
         fn: callback
       };
       return this.id++;
+    });
+
+    SeaWorker.browser_method('invoke_promise', function(service, args, callback) {
+      var deferred;
+      deferred = Q.defer();
+      this._worker.postMessage({
+        service: service,
+        payload: args,
+        id: this.id
+      });
+      this.cb[this.id] = {
+        service: service,
+        fn: callback,
+        promise: deferred
+      };
+      this.id++;
+      return deferred.promise.nodeify(callback);
     });
 
     function SeaWorker() {

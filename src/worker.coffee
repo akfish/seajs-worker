@@ -1,4 +1,5 @@
 define (require, exports, module) ->
+  has_q = typeof Q == 'function'
   is_worker = typeof importScripts == 'function'
 
   Function::worker_method = (name, fn) ->
@@ -20,8 +21,15 @@ define (require, exports, module) ->
       @::[name] = ->
         n = arguments.length
         cb = arguments[n - 1]
-        args = Array::slice.call(arguments, 0, n - 1)
-        @invoke name, args, cb
+        if typeof cb == 'function'
+          args = Array::slice.call(arguments, 0, n - 1)
+        else
+          args = Array::slice.call(arguments, 0, n)
+          cb = null
+        if has_q
+          return @invoke_promise name, args, cb
+        else
+          return @invoke name, args, cb
 
   class SeaWorker
     @worker_method 'init', ->
@@ -30,7 +38,6 @@ define (require, exports, module) ->
         name = e.data.service
         args = e.data.payload
         id = e.data.id
-
         try
           result = @[name].apply undefined, args
           self.postMessage
@@ -69,8 +76,19 @@ define (require, exports, module) ->
       c = @cb[data.id]
       delete @cb[data.id]
       if c.service != data.service
-        throw "Expect callback id=#{data.id} for service #{c.service}. Got #{data.service}"
-      c.fn? data.error, data.result
+        err = "Expect callback id=#{data.id} for service #{c.service}. Got #{data.service}"
+        if has_q
+          c.promise.reject err
+        else
+          throw err
+      if has_q
+        if data.error?
+          c.promise.reject data.error
+        else
+          c.promise.resolve data.result
+      else
+        c.fn? data.error, data.result
+      return
 
     @browser_method 'invoke', (service, args, callback) ->
       @_worker.postMessage
@@ -81,6 +99,19 @@ define (require, exports, module) ->
         service: service
         fn: callback
       @id++
+
+    @browser_method 'invoke_promise', (service, args, callback) ->
+      deferred = Q.defer()
+      @_worker.postMessage
+        service: service
+        payload: args
+        id: @id
+      @cb[@id] =
+        service: service
+        fn: callback
+        promise: deferred
+      @id++
+      deferred.promise.nodeify callback
 
     constructor: ->
       @init()
