@@ -12,13 +12,14 @@ define(function(require, exports, module) {
     }
 
     ExampleWorker.worker_service('echo', function(msg) {
-      console.log("Browser send: " + msg);
+      console.log("Browser sends: " + msg);
       return msg;
     });
 
     ExampleWorker.worker_service('add', function(a, b) {
       var adder;
-      console.log("Browser want add " + a + ", " + b);
+      console.log("Browser wants to add " + a + ", " + b);
+      console.log("Worker require('./adder')");
       adder = require('./adder');
       return adder(a, b);
     });
