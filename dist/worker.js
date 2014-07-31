@@ -161,7 +161,10 @@ define(function(require, exports, module) {
     };
 
     SeaWorker.map = function(data, service, max_worker_count, callback) {
-      var errors, fetch_next, finished_count, i, index, make_callback, results, return_result, returned, task, w, _i, _j, _len, _ref, _results;
+      var deferred, errors, fetch_next, finished_count, i, index, make_callback, results, return_result, returned, task, w, _i, _j, _len, _ref;
+      if (has_q) {
+        deferred = Q.defer();
+      }
       if (this.__pool == null) {
         this.__pool = [];
       }
@@ -184,10 +187,18 @@ define(function(require, exports, module) {
         if (returned) {
           return;
         }
-        if (typeof callback === "function") {
-          callback(errors, results);
-        }
         returned = true;
+        if (has_q) {
+          if (errors != null) {
+            deferred.reject(errors);
+          } else {
+            deferred.resolve(results);
+          }
+        } else {
+          if (typeof callback === "function") {
+            callback(errors, results);
+          }
+        }
       };
       make_callback = function(w, index) {
         return function(err, r) {
@@ -217,21 +228,20 @@ define(function(require, exports, module) {
         };
       };
       _ref = this.__pool.slice(0, +max_worker_count + 1 || 9e9);
-      _results = [];
       for (_j = 0, _len = _ref.length; _j < _len; _j++) {
         w = _ref[_j];
         task = fetch_next();
         index = i;
         if (has_q) {
-          _results.push(w.invoke_promise(service, [task], make_callback(w, index)));
+          w.invoke_promise(service, [task], make_callback(w, index));
         } else {
-          _results.push(w.invoke(service, [task], make_callback(w, index)));
+          w.invoke(service, [task], make_callback(w, index));
         }
       }
-      return _results;
+      return deferred != null ? deferred.promise.nodeify(callback) : void 0;
     };
 
-    SeaWorker.reduce = function(data, reducer, state, callback) {
+    SeaWorker.reduce = function(data, reducer, state) {
       var i, v, _i, _len;
       if (data == null) {
         return [];
@@ -240,7 +250,7 @@ define(function(require, exports, module) {
         v = data[i];
         state = reducer.call(void 0, state, v, i, data);
       }
-      return typeof callback === "function" ? callback(null, state) : void 0;
+      return state;
     };
 
     seajs.on("exec", function(mod) {

@@ -1,7 +1,5 @@
 define(function(require, exports, module) {
   var Worker, sea_opts, worker;
-  console.log('Yo!');
-  console.log('Whats Up!');
   Worker = require('./image-worker');
   sea_opts = {
     base: '../dist'
@@ -44,13 +42,12 @@ define(function(require, exports, module) {
         segs.push(s);
       }
       $status.text("Start Processing");
-      return Worker.map(segs, 'sepia', 5, function(err, dsts) {
-        return Worker.reduce(dsts, (function(ctx, s, i) {
+      return Worker.map(segs, 'sepia', 5).then(function(dsts) {
+        Worker.reduce(dsts, (function(ctx, s, i) {
           ctx.putImageData(s, 0, i * step);
           return ctx;
-        }), dst_ctx, function(err, result) {
-          return $status.text("Complete (hold mouse on canvas to see orignal version)");
-        });
+        }), dst_ctx);
+        return $status.text("Complete (hold mouse on canvas to see orignal version)");
       });
     };
     return img.src = 'cat-break-couple.jpg';

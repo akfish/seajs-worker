@@ -1,6 +1,6 @@
+# This example does the same job as:
+# http://blogs.msdn.com/b/eternalcoding/archive/2012/09/20/using-web-workers-to-improve-performance-of-image-manipulation.aspx
 define (require, exports, module) ->
-  console.log 'Yo!'
-  console.log 'Whats Up!'
   Worker = require './image-worker'
   sea_opts =
     base: '../dist'
@@ -41,10 +41,12 @@ define (require, exports, module) ->
         segs.push s
 
       $status.text  "Start Processing"
-      Worker.map segs, 'sepia', 5, (err, dsts) ->
-        Worker.reduce dsts, ((ctx, s, i) ->
-          ctx.putImageData s, 0, i * step
-          return ctx
-          ), dst_ctx, (err, result) ->
-            $status.text "Complete (hold mouse on canvas to see orignal version)"
+      # Start worker
+      Worker.map segs, 'sepia', 5
+        .then (dsts) ->
+          Worker.reduce dsts, ((ctx, s, i) ->
+            ctx.putImageData s, 0, i * step
+            return ctx
+            ), dst_ctx
+          $status.text "Complete (hold mouse on canvas to see orignal version)"
     img.src = 'cat-break-couple.jpg'

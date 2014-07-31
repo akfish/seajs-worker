@@ -13,19 +13,17 @@ define (require, exports, module) ->
         for v, i in result
           expect(v).toBe i
         done()
-    it "reduces", (done) ->
+    it "reduces", ->
       n = 100
       data = [0..n]
       sum = 0
       for v in data
         sum += v
-      Worker.reduce data, ((state, value, index, d) ->
+      result = Worker.reduce data, ((state, value, index, d) ->
         expect(value).toBe index
         expect(d).toBe data
         expect(state).not.toBe null
         return state + value
-        ), 0, (err, result) ->
-          expect(err).toBe null
-          expect(result).toBe sum
-          done()
+        ), 0
+      expect(result).toBe sum
   return

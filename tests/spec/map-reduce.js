@@ -24,8 +24,8 @@ define(function(require, exports, module) {
         return done();
       });
     });
-    return it("reduces", function(done) {
-      var data, n, sum, v, _i, _j, _len, _results;
+    return it("reduces", function() {
+      var data, n, result, sum, v, _i, _j, _len, _results;
       n = 100;
       data = (function() {
         _results = [];
@@ -37,16 +37,13 @@ define(function(require, exports, module) {
         v = data[_j];
         sum += v;
       }
-      return Worker.reduce(data, (function(state, value, index, d) {
+      result = Worker.reduce(data, (function(state, value, index, d) {
         expect(value).toBe(index);
         expect(d).toBe(data);
         expect(state).not.toBe(null);
         return state + value;
-      }), 0, function(err, result) {
-        expect(err).toBe(null);
-        expect(result).toBe(sum);
-        return done();
-      });
+      }), 0);
+      return expect(result).toBe(sum);
     });
   });
 });
