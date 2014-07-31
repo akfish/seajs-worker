@@ -71,6 +71,30 @@ A web worker will be created and managed by the browser instance.</p>
   </li>
   <li>
     <span class='signature'>
+      <a href='#map-static'>
+        .
+(null or Promise)
+<b>map</b><span>(data, service, max_worker_count, callback)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Map an Array of data to a new one. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#reduce-static'>
+        .
+(null or Promise)
+<b>reduce</b><span>(data, reducer, state, callback)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Boills down a Array of values into a single value. 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
       <a href='#worker_service-static'>
         .
 (void)
@@ -178,6 +202,155 @@ A web worker will be created and managed by the browser instance.</p>
   <ul class='see'>
     <li>
       <a href='https://github.com/seajs/seajs/issues/262'>Sea.js Configuration (in Chinese)</a>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='map-static'>
+      .
+(null or Promise)
+<b>map</b><span>(data, service, max_worker_count, callback)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Map an Array of data to a new one. Each element is processed by a worker
+service. Up to <code>max_worker_count</code> workers will be executing in parallel
+at the same time. Results are returned by callback or promise (if Q is available)</p>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>data</span>
+      <span class='type'>
+        (
+          <tt>Array</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>the data array to be proessed </span>
+    </li>
+    <li>
+      <span class='name'>service</span>
+      <span class='type'>
+        (
+          <tt>String</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>the name of a worker service </span>
+    </li>
+    <li>
+      <span class='name'>max_worker_count</span>
+      <span class='type'>
+        (
+          <tt>Interget</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>the maxiumum number of workers running in parallel </span>
+    </li>
+  </ul>
+  <h3>
+    Options Hash:
+    (callback):
+  </h3>
+  <ul class='options'>
+    <li>
+      <span class='name'>callback</span>
+      <span class='type'>
+        (
+          <tt>Function</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>the optional (if Q is available) callback </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      <tt>null or Promise</tt>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='reduce-static'>
+      .
+(null or Promise)
+<b>reduce</b><span>(data, reducer, state, callback)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <p>Boills down a Array of values into a single value.
+<code>state</code> is the inital state of the reduction, and each
+succeesive step of it should be returned by <code>reducer</code>.
+The <code>reducer</code> is passed four arguments:</p><ul>
+<li><code>state</code></li>
+<li><code>value</code></li>
+<li><code>index</code></li>
+<li>reference to the entire Array (a.k.a. <code>data</code>)</li>
+</ul>
+
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>data</span>
+      <span class='type'>
+        (
+          <tt>Array</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>the data array to be reduced </span>
+    </li>
+    <li>
+      <span class='name'>reducer</span>
+      <span class='type'>
+        (
+          <tt>Function</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>the reducer </span>
+    </li>
+    <li>
+      <span class='name'>state</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>the initial state </span>
+    </li>
+  </ul>
+  <h3>
+    Options Hash:
+    (callback):
+  </h3>
+  <ul class='options'>
+    <li>
+      <span class='name'>callback</span>
+      <span class='type'>
+        (
+          <tt>Function</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>the optional (if Q is available) callback </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      <tt>null or Promise</tt>
     </li>
   </ul>
 </div>
@@ -363,7 +536,7 @@ When Q is detected, a promise object will be returned.</p>
 </div>
     </div>
     <div id='footer'>
-  July 31, 14 12:02:22 by
+  July 31, 14 14:31:39 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>
