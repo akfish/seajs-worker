@@ -34,7 +34,13 @@
         </p>
       </nav>
       <div id='filecontents'>
-        <h1 id="-seajs-worker-https-github-com-akfish-seajs-worker-"><a href="https://github.com/akfish/seajs-worker">seajs-worker</a></h1><p>Seamless &amp; Modular Web Worker</p><h2 id="motivation">Motivation</h2><p>Working with web workers can be painful sometimes.</p><p>The worker script has to be in a separate file/blob
+        <h1 id="-seajs-worker-https-github-com-akfish-seajs-worker-"><a href="https://github.com/akfish/seajs-worker">seajs-worker</a></h1><p>Seamless &amp; Modular Web Worker</p><h2 id="installation">Installation</h2>
+<ol>
+<li>Clone this repository or just download <code>dist/worker.js</code> and <code>dist/launcher.js</code>.
+Then put them in the same folder.</li>
+<li>Install with <code>spm 3.x.x</code>. Run <code>spm install seajs-worker --save</code></li>
+</ol>
+<h2 id="motivation">Motivation</h2><p>Working with web workers can be painful sometimes.</p><p>The worker script has to be in a separate file/blob
 and communicate with browser script via messages:</p><pre><code class="lang-js">// worker.js
 console.log(&quot;Yo, I am a worker&quot;);
 
@@ -78,6 +84,7 @@ define (require, exports, module) -&gt;
   Worker = require &#39;./worker&#39;
 
   # Config sea.js in worker (same as seajs.config)
+  # See note below
   Worker.config
     base: &#39;path/to/base&#39;
 
@@ -96,7 +103,12 @@ define (require, exports, module) -&gt;
     .then (msg) -&gt; console.log &quot;Worker echos: #{msg} as promised&quot;
   worker.add 100, 1
     .then (sum) -&gt; console.log &quot;Worker adds: #{sum} as promised&quot;
-</code></pre><p>That&#39;s all one have to do. Simple as that.</p><p>See <code>example</code> folder for complete code.</p><h2 id="links">Links</h2>
+</code></pre><p>That&#39;s all one have to do. Simple as that.</p><p>See <code>example</code> folder for complete code.</p><h2 id="note">Note</h2>
+<ol>
+<li>If <code>base</code> is set to a relative path, it will be resolved relative to where <code>worker.js</code> is.</li>
+<li>Keep browser&#39;s and worker&#39;s sea.js pointing to the path. Make sure they have the same alias configuration.</li>
+</ol>
+<h2 id="links">Links</h2>
 <ul>
 <li><a href="https://github.com/akfish/seajs-worker">GitHub Repo</a></li>
 <li><a href="http://catx.me/seajs-worker/">Documents</a></li>
@@ -106,7 +118,7 @@ define (require, exports, module) -&gt;
       </div>
     </div>
     <div id='footer'>
-  July 30, 14 21:49:20 by
+  July 31, 14 12:02:22 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>

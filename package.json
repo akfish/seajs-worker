@@ -1,8 +1,12 @@
 {
   "name": "seajs-worker",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "Seamless usage of web worker",
   "main": "dist/worker.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akfish/seajs-worker"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,5 +20,8 @@
     "gulp-util": "~3.0.0",
     "gulp-watch": "~0.6.8",
     "codo": "~2.0.9"
+  },
+  "spm": {
+    "main": "dist/worker.js"
   }
 }
