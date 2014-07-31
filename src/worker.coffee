@@ -168,6 +168,75 @@ define (require, exports, module) ->
     # @option callback [Function] callback the optional (if Q is available) callback
     # @return [null or Promise]
     @map: (data, service, max_worker_count, callback) ->
+      if has_q
+        deferred = Q.defer()
+      # Creat worker pool
+      @__pool ?= []
+      for i in [0..max_worker_count]
+        if @__pool[i] instanceof @ then continue
+        @__pool[i] = new @()
+
+      # Helper
+      # Fetch data
+      i = -1
+      fetch_next = ->
+        i++
+        return data[i]
+
+      # Results
+      errors = null
+      results = []
+      finished_count = 0
+      returned = false
+      return_result = ->
+        if returned then return
+        returned = true
+        if has_q
+          if errors?
+            deferred.reject errors
+          else
+            deferred.resolve results
+        else
+          callback? errors, results
+        return
+
+      # Call back maker
+      make_callback = (w, index) ->
+        return (err, r) ->
+          if err?
+            errors ?= {}
+            errors[index] = err
+          results[index] = r
+          # Not finished?
+          if finished_count < data.length - 1
+            finished_count++
+
+            # Fetch new one
+            task = fetch_next()
+            _index = i
+            if i >= data.length
+              return
+
+            if has_q
+              w.invoke_promise service, [task], make_callback(w, _index)
+            else
+              w.invoke service [task], make_callback(w, _index)
+          else
+            # Finished
+            return_result()
+
+      # Get initial tasks
+      for w in @__pool[0..max_worker_count]
+        # TBD: race condition?
+        task = fetch_next()
+        index = i
+        if has_q
+          w.invoke_promise service, [task], make_callback(w, index)
+        else
+          w.invoke service, [task], make_callback(w, index)
+
+      # Return promise or null
+      return deferred?.promise.nodeify callback
 
     # Boills down a Array of values into a single value.
     # `state` is the inital state of the reduction, and each
@@ -177,12 +246,17 @@ define (require, exports, module) ->
     # * `value`
     # * `index`
     # * reference to the entire Array (a.k.a. `data`)
+    # @note This method is synchronized and runs on callsite
+    # @todo Provide asynchronized version that runs in worker
     # @param data [Array] the data array to be reduced
     # @param reducer [Function] the reducer
     # @param state [Object] the initial state
-    # @option callback [Function] callback the optional (if Q is available) callback
-    # @return [null or Promise]
-    @reduce: (data, reducer, state, callback) ->
+    # @return [Object] the reduced value
+    @reduce: (data, reducer, state) ->
+      if not data? then return []
+      for v, i in data
+        state = reducer.call undefined, state, v, i, data
+      return state
 
 
     # Fired when module is first loaded and executed

@@ -160,9 +160,98 @@ define(function(require, exports, module) {
       return SeaWorker.__sea_opts = sea_opts;
     };
 
-    SeaWorker.map = function(data, service, max_worker_count, callback) {};
+    SeaWorker.map = function(data, service, max_worker_count, callback) {
+      var deferred, errors, fetch_next, finished_count, i, index, make_callback, results, return_result, returned, task, w, _i, _j, _len, _ref;
+      if (has_q) {
+        deferred = Q.defer();
+      }
+      if (this.__pool == null) {
+        this.__pool = [];
+      }
+      for (i = _i = 0; 0 <= max_worker_count ? _i <= max_worker_count : _i >= max_worker_count; i = 0 <= max_worker_count ? ++_i : --_i) {
+        if (this.__pool[i] instanceof this) {
+          continue;
+        }
+        this.__pool[i] = new this();
+      }
+      i = -1;
+      fetch_next = function() {
+        i++;
+        return data[i];
+      };
+      errors = null;
+      results = [];
+      finished_count = 0;
+      returned = false;
+      return_result = function() {
+        if (returned) {
+          return;
+        }
+        returned = true;
+        if (has_q) {
+          if (errors != null) {
+            deferred.reject(errors);
+          } else {
+            deferred.resolve(results);
+          }
+        } else {
+          if (typeof callback === "function") {
+            callback(errors, results);
+          }
+        }
+      };
+      make_callback = function(w, index) {
+        return function(err, r) {
+          var task, _index;
+          if (err != null) {
+            if (errors == null) {
+              errors = {};
+            }
+            errors[index] = err;
+          }
+          results[index] = r;
+          if (finished_count < data.length - 1) {
+            finished_count++;
+            task = fetch_next();
+            _index = i;
+            if (i >= data.length) {
+              return;
+            }
+            if (has_q) {
+              return w.invoke_promise(service, [task], make_callback(w, _index));
+            } else {
+              return w.invoke(service([task], make_callback(w, _index)));
+            }
+          } else {
+            return return_result();
+          }
+        };
+      };
+      _ref = this.__pool.slice(0, +max_worker_count + 1 || 9e9);
+      for (_j = 0, _len = _ref.length; _j < _len; _j++) {
+        w = _ref[_j];
+        task = fetch_next();
+        index = i;
+        if (has_q) {
+          w.invoke_promise(service, [task], make_callback(w, index));
+        } else {
+          w.invoke(service, [task], make_callback(w, index));
+        }
+      }
+      return deferred != null ? deferred.promise.nodeify(callback) : void 0;
+    };
 
-    SeaWorker.reduce = function(data, reducer, state, callback) {};
+    SeaWorker.reduce = function(data, reducer, state) {
+      var i, v, _i, _len;
+      if (data == null) {
+        return [];
+      }
+      for (i = _i = 0, _len = data.length; _i < _len; i = ++_i) {
+        v = data[i];
+        state = reducer.call(void 0, state, v, i, data);
+      }
+      return state;
+    };
 
     seajs.on("exec", function(mod) {
       var _ref;

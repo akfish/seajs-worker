@@ -85,8 +85,8 @@ A web worker will be created and managed by the browser instance.</p>
     <span class='signature'>
       <a href='#reduce-static'>
         .
-(null or Promise)
-<b>reduce</b><span>(data, reducer, state, callback)</span>
+(Object)
+<b>reduce</b><span>(data, reducer, state)</span>
       </a>
     </span>
     <span class='desc'>
@@ -280,11 +280,19 @@ at the same time. Results are returned by callback or promise (if Q is available
   <div class='method_details'>
     <p class='signature' id='reduce-static'>
       .
-(null or Promise)
-<b>reduce</b><span>(data, reducer, state, callback)</span>
+(Object)
+<b>reduce</b><span>(data, reducer, state)</span>
       <br>
     </p>
     <div class='docstring'>
+  <div class='note todo'>
+    <strong>TODO:</strong>
+    Provide asynchronized version that runs in worker 
+  </div>
+  <div class='note'>
+    <strong>Note:</strong>
+    This method is synchronized and runs on callsite 
+  </div>
   <p>Boills down a Array of values into a single value.
 <code>state</code> is the inital state of the reduction, and each
 succeesive step of it should be returned by <code>reducer</code>.
@@ -330,27 +338,15 @@ The <code>reducer</code> is passed four arguments:</p><ul>
       <span class='desc'>the initial state </span>
     </li>
   </ul>
-  <h3>
-    Options Hash:
-    (callback):
-  </h3>
-  <ul class='options'>
-    <li>
-      <span class='name'>callback</span>
-      <span class='type'>
-        (
-          <tt>Function</tt>
-        )
-      </span>
-      &mdash;
-      <span class='desc'>the optional (if Q is available) callback </span>
-    </li>
-  </ul>
   <h3>Returns:</h3>
   <ul class='return'>
     <li>
       <span class='type'></span>
-      <tt>null or Promise</tt>
+      (
+        <tt>Object</tt>
+      )
+      &mdash;
+      <span class='desc'>the reduced value </span>
     </li>
   </ul>
 </div>
@@ -536,7 +532,7 @@ When Q is detected, a promise object will be returned.</p>
 </div>
     </div>
     <div id='footer'>
-  July 31, 14 16:24:11 by
+  July 31, 14 21:14:32 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>
