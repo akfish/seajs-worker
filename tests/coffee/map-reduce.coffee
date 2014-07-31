@@ -3,11 +3,13 @@ define (require, exports, module) ->
     Worker = require 'example/example-worker'
     it "maps", (done) ->
       expect(typeof Worker.map).toBe 'function'
-      n = 100
+      n = 1000
       Worker.map [0..n], 'echo', 10, (err, result) ->
+        console.log "Map Finished"
+        console.log result
         expect(err).toBe null
         expect(result).not.toBe null
-        expect(result.length).toBe n
+        expect(result.length).toBe n + 1
         for v, i in result
           expect(v).toBe i
         done()

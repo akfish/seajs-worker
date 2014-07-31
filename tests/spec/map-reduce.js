@@ -5,16 +5,18 @@ define(function(require, exports, module) {
     it("maps", function(done) {
       var n, _i, _results;
       expect(typeof Worker.map).toBe('function');
-      n = 100;
+      n = 1000;
       return Worker.map((function() {
         _results = [];
         for (var _i = 0; 0 <= n ? _i <= n : _i >= n; 0 <= n ? _i++ : _i--){ _results.push(_i); }
         return _results;
       }).apply(this), 'echo', 10, function(err, result) {
         var i, v, _j, _len;
+        console.log("Map Finished");
+        console.log(result);
         expect(err).toBe(null);
         expect(result).not.toBe(null);
-        expect(result.length).toBe(n);
+        expect(result.length).toBe(n + 1);
         for (i = _j = 0, _len = result.length; _j < _len; i = ++_j) {
           v = result[i];
           expect(v).toBe(i);

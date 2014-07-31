@@ -160,7 +160,76 @@ define(function(require, exports, module) {
       return SeaWorker.__sea_opts = sea_opts;
     };
 
-    SeaWorker.map = function(data, service, max_worker_count, callback) {};
+    SeaWorker.map = function(data, service, max_worker_count, callback) {
+      var errors, fetch_next, finished_count, i, index, make_callback, results, return_result, returned, task, w, _i, _j, _len, _ref, _results;
+      if (this.__pool == null) {
+        this.__pool = [];
+      }
+      for (i = _i = 0; 0 <= max_worker_count ? _i <= max_worker_count : _i >= max_worker_count; i = 0 <= max_worker_count ? ++_i : --_i) {
+        if (this.__pool[i] instanceof this) {
+          continue;
+        }
+        this.__pool[i] = new this();
+      }
+      i = -1;
+      fetch_next = function() {
+        i++;
+        return data[i];
+      };
+      errors = null;
+      results = [];
+      finished_count = 0;
+      returned = false;
+      return_result = function() {
+        if (returned) {
+          return;
+        }
+        if (typeof callback === "function") {
+          callback(errors, results);
+        }
+        returned = true;
+      };
+      make_callback = function(w, index) {
+        return function(err, r) {
+          var task, _index;
+          if (err != null) {
+            if (errors == null) {
+              errors = {};
+            }
+            errors[index] = err;
+          }
+          results[index] = r;
+          if (finished_count < data.length - 1) {
+            finished_count++;
+            task = fetch_next();
+            _index = i;
+            if (i >= data.length) {
+              return;
+            }
+            if (has_q) {
+              return w.invoke_promise(service, [task], make_callback(w, _index));
+            } else {
+              return w.invoke(service([task], make_callback(w, _index)));
+            }
+          } else {
+            return return_result();
+          }
+        };
+      };
+      _ref = this.__pool.slice(0, +max_worker_count + 1 || 9e9);
+      _results = [];
+      for (_j = 0, _len = _ref.length; _j < _len; _j++) {
+        w = _ref[_j];
+        task = fetch_next();
+        index = i;
+        if (has_q) {
+          _results.push(w.invoke_promise(service, [task], make_callback(w, index)));
+        } else {
+          _results.push(w.invoke(service, [task], make_callback(w, index)));
+        }
+      }
+      return _results;
+    };
 
     SeaWorker.reduce = function(data, reducer, state, callback) {
       var i, v, _i, _len;
