@@ -183,6 +183,10 @@ define (require, exports, module) ->
     # @option callback [Function] callback the optional (if Q is available) callback
     # @return [null or Promise]
     @reduce: (data, reducer, state, callback) ->
+      if not data? then return []
+      for v, i in data
+        state = reducer.call undefined, state, v, i, data
+      callback? null, state
 
 
     # Fired when module is first loaded and executed

@@ -21,7 +21,7 @@ define (require, exports, module) ->
         expect(value).toBe index
         expect(d).toBe data
         expect(state).not.toBe null
-        state += value
+        return state + value
         ), 0, (err, result) ->
           expect(err).toBe null
           expect(result).toBe sum

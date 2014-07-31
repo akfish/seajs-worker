@@ -162,7 +162,17 @@ define(function(require, exports, module) {
 
     SeaWorker.map = function(data, service, max_worker_count, callback) {};
 
-    SeaWorker.reduce = function(data, reducer, state, callback) {};
+    SeaWorker.reduce = function(data, reducer, state, callback) {
+      var i, v, _i, _len;
+      if (data == null) {
+        return [];
+      }
+      for (i = _i = 0, _len = data.length; _i < _len; i = ++_i) {
+        v = data[i];
+        state = reducer.call(void 0, state, v, i, data);
+      }
+      return typeof callback === "function" ? callback(null, state) : void 0;
+    };
 
     seajs.on("exec", function(mod) {
       var _ref;
