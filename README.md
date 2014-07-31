@@ -115,4 +115,5 @@ See `example` folder for complete code.
 
 * [GitHub Repo](https://github.com/akfish/seajs-worker)
 * [Documents](http://catx.me/seajs-worker/)
+* [Spec Runner](http://catx.me/seajs-worker/tests/SpecRunner.html)
 * [Live Version Of the Example Folder](http://catx.me/seajs-worker/example/)
