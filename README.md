@@ -2,6 +2,12 @@
 
 Seamless & Modular Web Worker
 
+## Installation
+
+1. Clone this repository or just download `dist/worker.js` and `dist/launcher.js`.
+Then put them in the same folder.
+2. Install with `spm 3.x.x`. Run `spm install seajs-worker --save`
+
 ## Motivation
 
 Working with web workers can be painful sometimes.
@@ -75,6 +81,7 @@ define (require, exports, module) ->
   Worker = require './worker'
 
   # Config sea.js in worker (same as seajs.config)
+  # See note below
   Worker.config
     base: 'path/to/base'
 
@@ -98,6 +105,11 @@ define (require, exports, module) ->
 That's all one have to do. Simple as that.
 
 See `example` folder for complete code.
+
+## Note
+
+1. If `base` is set to a relative path, it will be resolved relative to where `worker.js` is.
+2. Keep browser's and worker's sea.js pointing to the path. Make sure they have the same alias configuration.
 
 ## Links
 
