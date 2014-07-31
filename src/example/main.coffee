@@ -24,14 +24,27 @@ define (require, exports, module) ->
     img = new Image()
     img.onload = ->
       $status.text "Image Ready"
+      # Set canvas size
       width = src_canvas.width = dst_canvas.width = img.width
       height = src_canvas.height = dst_canvas.height = img.height
+      # Show original image
       src_ctx.drawImage img, 0, 0, width, height
+      # Get image data ready for processing
       img_src = src_ctx.getImageData 0, 0, width, height
-      img_dst = dst_ctx.createImageData img_src
+
+      # Make segements
+      n = 10
+      segs = []
+      step = height / n
+      for i in [0..n]
+        s = src_ctx.getImageData 0, step * i, width, step
+        segs.push s
+
       $status.text  "Start Processing"
-      worker.sharpen img_src, img_dst
-        .then (dst) ->
-          $status.text "Complete (hold mouse on canvas to see orignal version)"
-          dst_ctx.putImageData dst, 0, 0#, width, height
+      Worker.map segs, 'sepia', 5, (err, dsts) ->
+        Worker.reduce dsts, ((ctx, s, i) ->
+          ctx.putImageData s, 0, i * step
+          return ctx
+          ), dst_ctx, (err, result) ->
+            $status.text "Complete (hold mouse on canvas to see orignal version)"
     img.src = 'cat-break-couple.jpg'

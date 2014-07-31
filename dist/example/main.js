@@ -30,17 +30,27 @@ define(function(require, exports, module) {
     });
     img = new Image();
     img.onload = function() {
-      var height, img_dst, img_src, width;
+      var height, i, img_src, n, s, segs, step, width, _i;
       $status.text("Image Ready");
       width = src_canvas.width = dst_canvas.width = img.width;
       height = src_canvas.height = dst_canvas.height = img.height;
       src_ctx.drawImage(img, 0, 0, width, height);
       img_src = src_ctx.getImageData(0, 0, width, height);
-      img_dst = dst_ctx.createImageData(img_src);
+      n = 10;
+      segs = [];
+      step = height / n;
+      for (i = _i = 0; 0 <= n ? _i <= n : _i >= n; i = 0 <= n ? ++_i : --_i) {
+        s = src_ctx.getImageData(0, step * i, width, step);
+        segs.push(s);
+      }
       $status.text("Start Processing");
-      return worker.sharpen(img_src, img_dst).then(function(dst) {
-        $status.text("Complete (hold mouse on canvas to see orignal version)");
-        return dst_ctx.putImageData(dst, 0, 0);
+      return Worker.map(segs, 'sepia', 5, function(err, dsts) {
+        return Worker.reduce(dsts, (function(ctx, s, i) {
+          ctx.putImageData(s, 0, i * step);
+          return ctx;
+        }), dst_ctx, function(err, result) {
+          return $status.text("Complete (hold mouse on canvas to see orignal version)");
+        });
       });
     };
     return img.src = 'cat-break-couple.jpg';

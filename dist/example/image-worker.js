@@ -12,26 +12,6 @@ define(function(require, exports, module) {
       return ImageWorker.__super__.constructor.apply(this, arguments);
     }
 
-    ImageWorker.worker_service('sharpen', function(img_src, img_dst) {
-      console.log("Sharpening");
-      img_src.each_n4(function(p, N) {
-        var d_a, d_b, d_g, d_r, n, n_b, n_g, n_r, _i, _len;
-        n_r = n_g = n_b = 0;
-        for (_i = 0, _len = N.length; _i < _len; _i++) {
-          n = N[_i];
-          n_r += n.r;
-          n_g += n.g;
-          n_b += n.b;
-        }
-        d_r = p.r * 5 - n_r;
-        d_g = p.g * 5 - n_g;
-        d_b = p.b * 5 - n_b;
-        d_a = p.a;
-        return img_dst.setRGBA(p.i, d_r, d_g, d_b, d_a);
-      });
-      return img_dst;
-    });
-
     ImageWorker.worker_service('sepia', function(src) {
       src.each(function(p) {
         var b, g, r;
