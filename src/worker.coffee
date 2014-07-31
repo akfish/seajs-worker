@@ -159,6 +159,32 @@ define (require, exports, module) ->
     @config: (sea_opts) ->
       SeaWorker.__sea_opts = sea_opts
 
+    # Map an Array of data to a new one. Each element is processed by a worker
+    # service. Up to `max_worker_count` workers will be executing in parallel
+    # at the same time. Results are returned by callback or promise (if Q is available)
+    # @param data [Array] the data array to be proessed
+    # @param service [String] the name of a worker service
+    # @param max_worker_count [Interget] the maxiumum number of workers running in parallel
+    # @option callback [Function] callback the optional (if Q is available) callback
+    # @return [null or Promise]
+    @map: (data, service, max_worker_count, callback) ->
+
+    # Boills down a Array of values into a single value.
+    # `state` is the inital state of the reduction, and each
+    # succeesive step of it should be returned by `reducer`.
+    # The `reducer` is passed four arguments:
+    # * `state`
+    # * `value`
+    # * `index`
+    # * reference to the entire Array (a.k.a. `data`)
+    # @param data [Array] the data array to be reduced
+    # @param reducer [Function] the reducer
+    # @param state [Object] the initial state
+    # @option callback [Function] callback the optional (if Q is available) callback
+    # @return [null or Promise]
+    @reduce: (data, reducer, state, callback) ->
+
+
     # Fired when module is first loaded and executed
     seajs.on "exec", (mod) ->
       # Set module URI for later use

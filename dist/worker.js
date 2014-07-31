@@ -160,6 +160,10 @@ define(function(require, exports, module) {
       return SeaWorker.__sea_opts = sea_opts;
     };
 
+    SeaWorker.map = function(data, service, max_worker_count, callback) {};
+
+    SeaWorker.reduce = function(data, reducer, state, callback) {};
+
     seajs.on("exec", function(mod) {
       var _ref;
       return (_ref = mod.exports) != null ? _ref.__sea_mod_uri = mod.uri : void 0;
