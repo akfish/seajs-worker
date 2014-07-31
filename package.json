@@ -1,6 +1,6 @@
 {
   "name": "seajs-worker",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Seamless usage of web worker",
   "main": "dist/worker.js",
   "repository": {
