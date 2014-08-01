@@ -253,13 +253,14 @@ define(function(require, exports, module) {
       return state;
     };
 
-    seajs.on("exec", function(mod) {
-      var _ref;
-      return (_ref = mod.exports) != null ? _ref.__sea_mod_uri = mod.uri : void 0;
-    });
+    SeaWorker.extend = require('./extender');
 
     return SeaWorker;
 
   })();
+  seajs.on("exec", function(mod) {
+    var _ref;
+    return (_ref = mod.exports) != null ? _ref.__sea_mod_uri = mod.uri : void 0;
+  });
   return module.exports = SeaWorker;
 });

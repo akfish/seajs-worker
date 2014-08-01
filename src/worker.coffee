@@ -258,10 +258,11 @@ define (require, exports, module) ->
         state = reducer.call undefined, state, v, i, data
       return state
 
+    @extend: require './extender'
 
-    # Fired when module is first loaded and executed
-    seajs.on "exec", (mod) ->
-      # Set module URI for later use
-      mod.exports?.__sea_mod_uri = mod.uri
+  # Fired when module is first loaded and executed
+  seajs.on "exec", (mod) ->
+    # Set module URI for later use
+    mod.exports?.__sea_mod_uri = mod.uri
 
   module.exports = SeaWorker
