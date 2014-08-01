@@ -37,6 +37,42 @@ define (require, exports, module) ->
   # and the other running in a web worker doing all the work.
   # A web worker will be created and managed by the browser instance.
   #
+  # @method .extend(proto)
+  #   @note For JavaScript
+  #   Create a derived class
+  #   @example Create a worker class in JavaScript
+  #     var Derived = SeaWorker.extend({
+  #       field: 'I am a field',
+  #       method: function () {
+  #         // I'm a function exists in both worker and browser
+  #       },
+  #       constructor: function (n) {
+  #         this.n = n;
+  #         // Call parent constructor if needed
+  #         // this.__super(n);
+  #       }
+  #     });
+  #
+  #     // Worker side methods
+  #     Derived.inWorker("methodInWorkerOnly", function() {});
+  #
+  #     // Browser side methods
+  #     Derived.inBrowser("methodInBrowserOnly", function() {});
+  #
+  #     // Worker service, running in worker, called from browser
+  #     Derived.service("foo", function() {});
+  #
+  #   @param proto [Object] Derived class prototype
+  #   @return [Class]
+  # @method .service(name, fn)
+  #   @note For JavaScript
+  #   Short-hand version of {SeaWorker.worker_service}
+  # @method .inWorker(name, fn)
+  #   @note For JavaScript
+  #   Short-hand version of {SeaWorker.worker_method}
+  # @method .inBrowser(name, fn)
+  #   @note For JavaScript
+  #   Short-hand version of {SeaWorker.browser_method}
   # @method .worker_service(name, fn)
   #   Defines a service that runs in worker.
   #   @param [String] name the name of the service

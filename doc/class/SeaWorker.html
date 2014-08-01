@@ -95,6 +95,54 @@ A web worker will be created and managed by the browser instance.</p>
   </li>
   <li>
     <span class='signature'>
+      <a href='#extend-static'>
+        .
+(Class)
+<b>extend</b><span>(proto)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Create a derived class 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#service-static'>
+        .
+(void)
+<b>service</b><span>(name, fn)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Short-hand version of <a href='../class/SeaWorker.html#worker_service-static'>SeaWorker.worker_service</a> 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#inWorker-static'>
+        .
+(void)
+<b>inWorker</b><span>(name, fn)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Short-hand version of <a href='../class/SeaWorker.html#worker_method-static'>SeaWorker.worker_method</a> 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
+      <a href='#inBrowser-static'>
+        .
+(void)
+<b>inBrowser</b><span>(name, fn)</span>
+      </a>
+    </span>
+    <span class='desc'>
+      Short-hand version of <a href='../class/SeaWorker.html#browser_method-static'>SeaWorker.browser_method</a> 
+    </span>
+  </li>
+  <li>
+    <span class='signature'>
       <a href='#worker_service-static'>
         .
 (void)
@@ -352,6 +400,120 @@ The <code>reducer</code> is passed four arguments:</p><ul>
 </div>
   </div>
   <div class='method_details'>
+    <p class='signature' id='extend-static'>
+      .
+(Class)
+<b>extend</b><span>(proto)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <div class='note'>
+    <strong>Note:</strong>
+    For JavaScript 
+  </div>
+  <p>Create a derived class</p>
+  <div class='examples'>
+    <h3>Examples:</h3>
+    <h4>
+      Create a worker class in JavaScript
+    </h4>
+    <pre><code class='coffeescript'>var Derived = SeaWorker.extend({
+  field: &#39;I am a field&#39;,
+  method: function () {
+    &#47;&#47; I&#39;m a function exists in both worker and browser
+  },
+  constructor: function (n) {
+    this.n = n;
+    &#47;&#47; Call parent constructor if needed
+    &#47;&#47; this.__super(n);
+  }
+});
+
+&#47;&#47; Worker side methods
+Derived.inWorker(&quot;methodInWorkerOnly&quot;, function() {});
+
+&#47;&#47; Browser side methods
+Derived.inBrowser(&quot;methodInBrowserOnly&quot;, function() {});
+
+&#47;&#47; Worker service, running in worker, called from browser
+Derived.service(&quot;foo&quot;, function() {});</code></pre>
+  </div>
+</div>
+<div class='tags'>
+  <h3>Parameters:</h3>
+  <ul class='param'>
+    <li>
+      <span class='name'>proto</span>
+      <span class='type'>
+        (
+          <tt>Object</tt>
+        )
+      </span>
+      &mdash;
+      <span class='desc'>Derived class prototype </span>
+    </li>
+  </ul>
+  <h3>Returns:</h3>
+  <ul class='return'>
+    <li>
+      <span class='type'></span>
+      <tt>Class</tt>
+    </li>
+  </ul>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='service-static'>
+      .
+(void)
+<b>service</b><span>(name, fn)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <div class='note'>
+    <strong>Note:</strong>
+    For JavaScript 
+  </div>
+  <p>Short-hand version of <a href='../class/SeaWorker.html#worker_service-static'>SeaWorker.worker_service</a></p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='inWorker-static'>
+      .
+(void)
+<b>inWorker</b><span>(name, fn)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <div class='note'>
+    <strong>Note:</strong>
+    For JavaScript 
+  </div>
+  <p>Short-hand version of <a href='../class/SeaWorker.html#worker_method-static'>SeaWorker.worker_method</a></p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
+    <p class='signature' id='inBrowser-static'>
+      .
+(void)
+<b>inBrowser</b><span>(name, fn)</span>
+      <br>
+    </p>
+    <div class='docstring'>
+  <div class='note'>
+    <strong>Note:</strong>
+    For JavaScript 
+  </div>
+  <p>Short-hand version of <a href='../class/SeaWorker.html#browser_method-static'>SeaWorker.browser_method</a></p>
+</div>
+<div class='tags'>
+</div>
+  </div>
+  <div class='method_details'>
     <p class='signature' id='worker_service-static'>
       .
 (void)
@@ -532,7 +694,7 @@ When Q is detected, a promise object will be returned.</p>
 </div>
     </div>
     <div id='footer'>
-  July 31, 14 21:14:32 by
+  August 01, 14 15:25:09 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>
