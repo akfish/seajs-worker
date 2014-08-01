@@ -2,17 +2,17 @@ define (require, exports, module) ->
   has_q = typeof Q == 'function'
   is_worker = typeof importScripts == 'function'
 
-  Function::worker_method = (name, fn) ->
+  Function::inWorker = Function::worker_method = (name, fn) ->
     if not is_worker or typeof fn != 'function'
       return
     @::[name] = fn
 
-  Function::browser_method = (name, fn) ->
+  Function::inBrowser = Function::browser_method = (name, fn) ->
     if is_worker or typeof fn != 'function'
       return
     @::[name] = fn
 
-  Function::worker_service = (name, fn) ->
+  Function::service = Function::worker_service = (name, fn) ->
     if typeof fn != 'function'
       return
     if is_worker

@@ -4,11 +4,11 @@ define(function(require, exports, module) {
   
   var JsWorker = SeaWorker.extend();
 
-  JsWorker.worker_service('echo', function (msg) {
+  JsWorker.service('echo', function (msg) {
     return msg;
   });
 
-  JsWorker.worker_service('add', function (a, b) {
+  JsWorker.service('add', function (a, b) {
     var adder = require('./adder');
     return adder(a, b);
   });

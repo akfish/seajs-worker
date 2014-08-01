@@ -2,19 +2,19 @@ define(function(require, exports, module) {
   var SeaWorker, has_q, is_worker;
   has_q = typeof Q === 'function';
   is_worker = typeof importScripts === 'function';
-  Function.prototype.worker_method = function(name, fn) {
+  Function.prototype.inWorker = Function.prototype.worker_method = function(name, fn) {
     if (!is_worker || typeof fn !== 'function') {
       return;
     }
     return this.prototype[name] = fn;
   };
-  Function.prototype.browser_method = function(name, fn) {
+  Function.prototype.inBrowser = Function.prototype.browser_method = function(name, fn) {
     if (is_worker || typeof fn !== 'function') {
       return;
     }
     return this.prototype[name] = fn;
   };
-  Function.prototype.worker_service = function(name, fn) {
+  Function.prototype.service = Function.prototype.worker_service = function(name, fn) {
     if (typeof fn !== 'function') {
       return;
     }
