@@ -2,17 +2,17 @@ define (require, exports, module) ->
   has_q = typeof Q == 'function'
   is_worker = typeof importScripts == 'function'
 
-  Function::worker_method = (name, fn) ->
+  Function::inWorker = Function::worker_method = (name, fn) ->
     if not is_worker or typeof fn != 'function'
       return
     @::[name] = fn
 
-  Function::browser_method = (name, fn) ->
+  Function::inBrowser = Function::browser_method = (name, fn) ->
     if is_worker or typeof fn != 'function'
       return
     @::[name] = fn
 
-  Function::worker_service = (name, fn) ->
+  Function::service = Function::worker_service = (name, fn) ->
     if typeof fn != 'function'
       return
     if is_worker
@@ -37,6 +37,42 @@ define (require, exports, module) ->
   # and the other running in a web worker doing all the work.
   # A web worker will be created and managed by the browser instance.
   #
+  # @method .extend(proto)
+  #   @note For JavaScript
+  #   Create a derived class
+  #   @example Create a worker class in JavaScript
+  #     var Derived = SeaWorker.extend({
+  #       field: 'I am a field',
+  #       method: function () {
+  #         // I'm a function exists in both worker and browser
+  #       },
+  #       constructor: function (n) {
+  #         this.n = n;
+  #         // Call parent constructor if needed
+  #         // this.__super(n);
+  #       }
+  #     });
+  #
+  #     // Worker side methods
+  #     Derived.inWorker("methodInWorkerOnly", function() {});
+  #
+  #     // Browser side methods
+  #     Derived.inBrowser("methodInBrowserOnly", function() {});
+  #
+  #     // Worker service, running in worker, called from browser
+  #     Derived.service("foo", function() {});
+  #
+  #   @param proto [Object] Derived class prototype
+  #   @return [Class]
+  # @method .service(name, fn)
+  #   @note For JavaScript
+  #   Short-hand version of {SeaWorker.worker_service}
+  # @method .inWorker(name, fn)
+  #   @note For JavaScript
+  #   Short-hand version of {SeaWorker.worker_method}
+  # @method .inBrowser(name, fn)
+  #   @note For JavaScript
+  #   Short-hand version of {SeaWorker.browser_method}
   # @method .worker_service(name, fn)
   #   Defines a service that runs in worker.
   #   @param [String] name the name of the service
@@ -258,10 +294,11 @@ define (require, exports, module) ->
         state = reducer.call undefined, state, v, i, data
       return state
 
+    @extend: require './extender'
 
-    # Fired when module is first loaded and executed
-    seajs.on "exec", (mod) ->
-      # Set module URI for later use
-      mod.exports?.__sea_mod_uri = mod.uri
+  # Fired when module is first loaded and executed
+  seajs.on "exec", (mod) ->
+    # Set module URI for later use
+    mod.exports?.__sea_mod_uri = mod.uri
 
   module.exports = SeaWorker

@@ -58,7 +58,7 @@ worker.onmessage = function (e) {
 }
 </code></pre><p>The code can easily become too messy to maintain as application&#39;s complexity grows.</p><p>Sea.js acquired web worker support from pull request <a href="https://github.com/seajs/seajs/pull/1279">#1279</a>,
 which enables developer to use <code>importScript</code> to load sea.js in a web worker context and then <code>require</code>
-other sea.js modules.</p><p>This sea.js plugin makes it even easier by managing all low level web workers detials for developers.</p><h2 id="example">Example</h2><p>Using seajs-worker is simple. It works the best with CoffeeScript syntax. There are only 2 steps.</p><p>Step 1 - create a worker class</p><pre><code class="lang-coffee"># worker.coffee
+other sea.js modules.</p><p>This sea.js plugin makes it even easier by managing all low level web workers detials for developers.</p><h2 id="example">Example</h2><p>Using seajs-worker is simple. It works the best with CoffeeScript syntax (for notes on JavaScript, see below). There are only 2 steps.</p><p>Step 1 - create a worker class</p><pre><code class="lang-coffee"># worker.coffee
 define (require, exports, module) -&gt;
   # This plugin comes as a CMD module and can be loaded with sea.js
   SeaWorker = require &#39;path/to/sea/worker&#39;
@@ -103,7 +103,39 @@ define (require, exports, module) -&gt;
     .then (msg) -&gt; console.log &quot;Worker echos: #{msg} as promised&quot;
   worker.add 100, 1
     .then (sum) -&gt; console.log &quot;Worker adds: #{sum} as promised&quot;
-</code></pre><p>That&#39;s all one have to do. Simple as that.</p><p>See <code>example</code> folder for complete code.</p><h2 id="note">Note</h2>
+</code></pre><p>That&#39;s all one have to do. Simple as that.</p><p>See <code>example</code> folder for complete code.</p><h3 id="for-javascript-developer">For JavaScript Developer</h3><p>seajs-worker also provided a few helpers for JavaScript developer:</p><pre><code class="lang-js">define(function(require, exports, module) {
+  // Require base
+  SeaWorker = require(&#39;path/to/sea/worker&#39;);
+
+  // Create a derived class
+  var Derived = SeaWorker.extend({
+    field: &#39;I am a field&#39;,
+    method: function () {
+      // I&#39;m a function exists in both worker and browser
+    },
+    constructor: function (n) {
+      this.n = n;
+      // Call parent constructor if needed
+      // this.__super(n);
+    }
+  });
+
+  // Worker side methods
+  Derived.inWorker(&quot;methodInWorkerOnly&quot;, function() {});
+
+  // Browser side methods
+  Derived.inBrowser(&quot;methodInBrowserOnly&quot;, function() {});
+
+  // Worker service, running in worker, called from browser
+  Derived.service(&quot;foo&quot;, function() {});
+
+  // Register
+  SeaWorker.register(Derived);
+
+  module.exports = Derived;
+});
+</code></pre>
+<h2 id="note">Note</h2>
 <ol>
 <li>If <code>base</code> is set to a relative path, it will be resolved relative to where <code>worker.js</code> is.</li>
 <li>Keep browser&#39;s and worker&#39;s sea.js pointing to the path. Make sure they have the same alias configuration.</li>
@@ -119,7 +151,7 @@ define (require, exports, module) -&gt;
       </div>
     </div>
     <div id='footer'>
-  July 31, 14 21:14:32 by
+  August 01, 14 15:28:38 by
   <a href='https://github.com/coffeedoc/codo' title='CoffeeScript API documentation generator'>
     Codo
   </a>
