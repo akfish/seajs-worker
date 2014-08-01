@@ -3,4 +3,5 @@ define(function(require, exports, module) {
   require('./basic');
   require('./example');
   require('./map-reduce');
+  require('./extender');
 });

@@ -45,7 +45,7 @@ This sea.js plugin makes it even easier by managing all low level web workers de
 
 ## Example
 
-Using seajs-worker is simple. It works the best with CoffeeScript syntax. There are only 2 steps.
+Using seajs-worker is simple. It works the best with CoffeeScript syntax (for notes on JavaScript, see below). There are only 2 steps.
 
 Step 1 - create a worker class
 
@@ -105,6 +105,44 @@ define (require, exports, module) ->
 That's all one have to do. Simple as that.
 
 See `example` folder for complete code.
+
+### For JavaScript Developer
+
+seajs-worker also provided a few helpers for JavaScript developer:
+
+```js
+define(function(require, exports, module) {
+  // Require base
+  SeaWorker = require('path/to/sea/worker');
+
+  // Create a derived class
+  var Derived = SeaWorker.extend({
+    field: 'I am a field',
+    method: function () {
+      // I'm a function exists in both worker and browser
+    },
+    constructor: function (n) {
+      this.n = n;
+      // Call parent constructor if needed
+      // this.__super(n);
+    }
+  });
+
+  // Worker side methods
+  Derived.inWorker("methodInWorkerOnly", function() {});
+
+  // Browser side methods
+  Derived.inBrowser("methodInBrowserOnly", function() {});
+
+  // Worker service, running in worker, called from browser
+  Derived.service("foo", function() {});
+
+  // Register
+  SeaWorker.register(Derived);
+
+  module.exports = Derived;
+});
+```
 
 ## Note
 
